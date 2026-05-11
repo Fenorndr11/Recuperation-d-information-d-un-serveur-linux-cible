@@ -42,3 +42,5 @@ echo -e "${b}Distribution linux: ${nc} ${j} ${PRETTY_NAME}${nc}"
 echo -e "${b}Noyau (Linux Kernel): ${nc} ${j} $(uname -r)${nc}"
 echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}"
 
+
+echo -e "${r}===============\nHARDWARE INFORMATION\n=============== ${nc}"
