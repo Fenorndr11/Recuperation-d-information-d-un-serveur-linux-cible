@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#####################################################################
+#                                                                   #
+#   BASH SCRIPTING FOR RETRIVIAL INFORMATION FROM A LINUX SERVER    #
+#                                                                   #
+#####################################################################
+
+###definition des codes couleurs utilisés
+r='\033[0;31m' #rouge
+v='\033[0;32m' #vert
+j='\033[0;33m' #jaune
+b='\033[0;34m' #bleu
+nc='\033[0m'   #default
+
+
+###rafraichit l'ecran du terminal
+clear
+
+###verifie l'argument entré
+if [[ $# -ne 0 ]];then
+  echo -e "${r}Erreur:${nc} Mauvais argument, Usage : $0"
+  exit 1
+fi
+
+###verifie l'OS à analyser
+if [[ $OSTYPE != linux* ]];then
+    echo -e "${r}Erreur:${nc} Mauvais type d'OS, SUPPORTE SEULEMENT UN SYSTEME LINUX"
+    exit 1
+fi
+
+###Extraction des informations systemes à l'aide du fichier os-release
+##On copie les variables du fichier os_release dans l'environnement
+if [[ -r /etc/os-release ]];then
+	. /etc/os-release
+elif [[ -r /usr/lib/os-release ]];then
+	. /usr/lib/os-release
+fi
+
+echo -e "${r}===============\nOS INFORMATION\n=============== ${nc}"
+echo -e "${b}Distribution linux: ${nc} ${j} ${PRETTY_NAME}${nc}"
+echo -e "${b}Noyau (Linux Kernel): ${nc} ${j} $(uname -r)${nc}"
+echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}"
+
