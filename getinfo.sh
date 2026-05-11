@@ -37,14 +37,14 @@ elif [[ -r /usr/lib/os-release ]];then
 	. /usr/lib/os-release
 fi
 
-echo -e "${r}======================\nOS INFORMATION\n====================== ${nc}"
+echo -e "${r}\t\t\t======================\n\t\t\t\tOS INFORMATION\n\t\t\t====================== ${nc}"
 echo -e "${b}Distribution linux: ${nc} ${j} ${PRETTY_NAME}${nc}"
 echo -e "${b}Noyau (Linux Kernel): ${nc} ${j} $(uname -r)${nc}"
 echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}"
 
 ##Recuperation des informations coté materielle et fabricant grace aux fichiers dans /sys/class/dmi/id
 file=/sys/class/dmi/id
-echo -e "\n\n${r}======================\nHARDWARE INFORMATION\n====================== ${nc}"
+echo -e "\n\n${r}\t\t\t======================\n\t\t\t\tHARDWARE INFORMATION\n\t\t\t====================== ${nc}"
 if [[ -d $file ]];then
   if [[ -r "$file/sys_vendor" ]];then
     model=$(cat $file/sys_vendor)
