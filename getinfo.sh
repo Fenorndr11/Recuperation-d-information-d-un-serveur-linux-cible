@@ -44,7 +44,7 @@ echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}
 
 ##Recuperation des informations coté materielle et fabricant grace aux fichiers dans /sys/class/dmi/id
 file=/sys/class/dmi/id
-echo -e "${r}===============\nHARDWARE INFORMATION\n=============== ${nc}"
+echo -e "\n\n${r}===============\nHARDWARE INFORMATION\n=============== ${nc}"
 if [[ -d $file ]];then
   if [[ -r "$file/sys_vendor" ]];then
     model=$(cat $file/sys_vendor)
