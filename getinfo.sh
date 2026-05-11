@@ -55,10 +55,10 @@ if [[ -d $file ]];then
   fi
   
   if [[ -r "$file/product_name" ]];then
-	model+="$(cat $file/product_name)"
+	model+=" $(cat $file/product_name)"
   fi
   if [[ -r "$file/product_version" ]];then
-	model+="$(cat $file/product_version)"
+	model+=" $(cat $file/product_version)"
   fi
 elif [[ -r /sys/firmware/devicetree/base/model ]];then
   model=$(cat /sys/firmware/devicetree/base/model)
