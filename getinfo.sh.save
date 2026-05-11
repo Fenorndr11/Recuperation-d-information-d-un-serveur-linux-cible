@@ -42,28 +42,10 @@ echo -e "${b}Distribution linux: ${nc} ${j} ${PRETTY_NAME}${nc}"
 echo -e "${b}Noyau (Linux Kernel): ${nc} ${j} $(uname -r)${nc}"
 echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}"
 
-##Recuperation des informations coté materielle et fabricant grace aux fichiers dans /sys/class/dmi/id
-file=/sys/class/dmi/id
+
 echo -e "${r}===============\nHARDWARE INFORMATION\n=============== ${nc}"
+##fichier de recuperation des informations hardware coté fabricant et entreprise: /sys/class/dmi/id
+file=/sys/class/dmi/id
 if [[ -d $file ]];then
-  if [[ -r "$file/sys_vendor" ]];then
-    model=$(cat $file/sys_vendor)
-  elif [[ -r "$file/board_vendor" ]];then
-	model=$(cat $file/board_vendor)
-  elif [[ -r "$file/chassis_vendor" ]];then
-	model=$(cat $file/chassis_vendor)
-  fi
-  
-  if [[ -r "$file/product_name" ]];then
-	model+="$(cat $file/product_name)"
-  fi
-  if [[ -r "$file/product_version" ]];then
-	model+="$(cat $file/product_version)"
-  fi
-elif [[ -r /sys/firmware/devicetree/base/model ]];then
-  model=$(cat /sys/firmware/devicetree/base/model)
-fi
-if [[ -n $model ]];then
-  echo -e "${b}Modele du machine: ${nc} ${j}$model${nc}"
-fi
-  
+	if [[ -r "$file/sys_vendor" ]];then
+		
