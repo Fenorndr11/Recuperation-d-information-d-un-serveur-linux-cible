@@ -6,6 +6,13 @@
 #                                                                   #
 #####################################################################
 
+###definition des foncions necessaires
+sec_field()
+{
+  cut -d ":" -f2 | sed 's/^( ){20}//g'
+}
+
+
 ###definition des codes couleurs utilisés
 r='\033[0;31m' #rouge
 v='\033[0;32m' #vert
@@ -66,4 +73,13 @@ fi
 if [[ -n $model ]];then
   echo -e "${b}Modele du machine: ${nc} ${j}$model${nc}"
 fi
-  
+
+##architecture et information cpu
+info=$(lscpu)
+core_per_socket=$(echo "$info" |head -n 12 |tail -n 1 | sec_field)
+threads_per_core=$(echo "$info" |head -n 11 |tail -n 1 | sec_field) 
+sockets=$(echo "$info" |head -n 13 |tail -n 1 | sec_field)
+echo -e "${b}Architecture: ${nc} ${j}$(echo "$info" |head -n 1 |tail -n 1 |sec_field)${nc}"
+echo -e "${b}Modele CPU: ${nc} ${j}$(echo "$info" |head -n 8 |tail -n 1 |sec_field)${nc}"
+echo -e "${b}CPU cores/threads/sockets: ${nc} ${j} $(echo "$core_per_socket*$sockets" |bc -l)/$(echo "$threads_per_core*$core_per_socket*$sockets" |bc -l)/$sockets${nc}"
+
