@@ -12,7 +12,6 @@ sec_field()
   cut -d ":" -f2 |xargs
 }
 
-
 ###definition des codes couleurs utilisés
 r='\033[0;31m' #rouge
 v='\033[0;32m' #vert
@@ -49,7 +48,7 @@ echo -e "${b}Distribution linux: ${nc} ${j} ${PRETTY_NAME}${nc}"
 echo -e "${b}Noyau (Linux Kernel): ${nc} ${j} $(uname -r)${nc}"
 echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}"
 
-##Recuperation des informations coté materielle et fabricant grace aux fichiers dans /sys/class/dmi/id
+###Recuperation des informations coté materielle et fabricant grace aux fichiers dans /sys/class/dmi/id
 file=/sys/class/dmi/id
 echo -e "\n\n${r}\t\t\t======================\n\t\t\t  HARDWARE INFORMATION\n\t\t\t====================== ${nc}"
 if [[ -d $file ]];then
@@ -86,15 +85,44 @@ echo -e "${b}CPU cores/threads/sockets: ${nc} ${j} $(echo "$core_per_socket*$soc
 ##information memoire (coté RAM et disque)
 mem=$(free -h |head -n 2 |tail -n 1)
 echo -e "${b}RAM:${nc}"
-echo -e "${v}\t_totale: ${nc} ${j}$(echo -e "$mem" |awk '{ print $2 }' |sed 's/i//g') ${nc}"
-echo -e "${v}\t_disponible (prete à utiliser): ${nc} ${j}$(echo -e "$mem" |awk '{ print $7 }' |sed 's/i//g') ${nc}"
-echo -e "${v}\t_libre (inutilisable): ${nc} ${j}$(echo -e "$mem" |awk '{ print $4 }' |sed 's/i//g') ${nc}"
+echo -e "${v} _totale: ${nc} ${j}$(echo -e "$mem" |awk '{ print $2 }' |sed 's/i//g') ${nc}"
+echo -e "${v} _disponible (prete à utiliser): ${nc} ${j}$(echo -e "$mem" |awk '{ print $7 }' |sed 's/i//g') ${nc}"
+echo -e "${v} _libre (inutilisable): ${nc} ${j}$(echo -e "$mem" |awk '{ print $4 }' |sed 's/i//g') ${nc}"
 nb_disque=$(lsblk -d -o NAME,SIZE |wc -l)
 disque=$(lsblk -d -o NAME,SIZE)
 line=2
 echo -e "${b}DISQUE:${nc}"
 while((line <= nb_disque));do
-  echo -e "${v}\t$(echo -e "$disque" |head -n $line |tail -n 1) ${nc}"
+  echo -e "${v} $(echo -e "$disque" |head -n $line |tail -n 1) ${nc}"
   line=$(echo "$line+1" |bc -l)
 done
+
+###information cote logiciel
+echo -e "\n\n${r}\t\t\t======================\n\t\t\t  SOFTWARE INFORMATION\n\t\t\t====================== ${nc}"
+##nombre de logiciel installé selon gestionnaire de paquet
+if command -v dpkg &> /dev/null; then
+    total=$(dpkg -l | grep -c ^ii)
+elif command -v rpm &> /dev/null; then
+    total=$(rpm -qa | wc -l)
+elif command -v pacman &> /dev/null; then
+    total=$(pacman -Q | wc -l)
+else
+    total="Inconnu (gestionnaire non supporté)"
+fi
+
+echo -e "${b}Nombre de paquets installés: ${nc} ${j}$total${nc}"
+echo -e "${b}Nombre de processus en cours: ${nc} ${j}$(ps -e --no-headers | wc -l)${nc}"
+
+###information cote reseau
+echo -e "\n\n${r}\t\t\t======================\n\t\t\t  NETWORK INFORMATION\n\t\t\t====================== ${nc}"
+interface_wifi=($(ip -o a show up primary scope global | awk '{ print $2 }' | uniq | head -n 1))
+echo -e "${b}Nom de la machine: ${nc} ${j}$HOSTNAME${nc}"
+if command -v iwgetid >/dev/null; then
+	NETWORKNAME=$(iwgetid -r || true)
+fi
+if [[ -n $NETWORKNAME ]]; then
+	echo -e "${b}Nom du reseau (SSID): ${nc} ${j}$NETWORKNAME${nc}"
+fi
+echo -e "${b}Adresse ipv4: ${nc} ${j}$(ip -o -4 a show up scope global | awk '{ print $2,$4 }')${nc}"
+echo -e "${b}Adresse MAC: ${nc} ${j}$(cat /sys/class/net/$interface_wifi/address)${nc}"
 
