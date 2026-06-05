@@ -125,6 +125,6 @@ fi
 echo -e "${b}Adresse ipv4: ${nc} ${j}$(ip -o -4 a show up scope global | awk '{ print $2,$4 }')${nc}"
 for interface in $(ip -o a show up primary scope global | awk '{ print $2 }' | uniq); do
     mac=$(</sys/class/net/$interface/address)
-    echo -e "${b}MAC ($iface):${nc} ${j}$mac${nc}"
+    echo -e "${b}MAC ($interface):${nc} ${j}$mac${nc}"
 done
 
