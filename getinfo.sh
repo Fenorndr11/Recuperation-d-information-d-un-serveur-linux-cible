@@ -45,8 +45,8 @@ fi
 
 echo -e "${r}\t\t\t======================\n\t\t\t  OS INFORMATION\n\t\t\t====================== ${nc}"
 echo -e "${b}Distribution linux: ${nc} ${j} ${PRETTY_NAME}${nc}"
-echo -e "${b}Noyau (Linux Kernel): ${nc} ${j} $(uname -r)${nc}"
-echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $(echo "$SHELL")${nc}"
+echo -e "${b}Noyau (Linux Kernel): ${nc} ${j}$(</proc/sys/kernel/osrelease)${nc}"
+echo -e "${b}Interpreteur de commande (chemin): ${nc} ${j} $SHELL ${nc}"
 
 ###Recuperation des informations coté materielle et fabricant grace aux fichiers dans /sys/class/dmi/id
 file=/sys/class/dmi/id
@@ -80,21 +80,21 @@ threads_per_core=$(echo "$info" | awk -F: '/^Thread\(s\) per core/ {gsub(/ /,"",
 sockets=$(echo "$info"          | awk -F: '/^Socket\(s\)/          {gsub(/ /,"",$2); print $2}')
 echo -e "${b}Architecture: ${nc} ${j}$(echo "$info" |head -n 1 |tail -n 1 | sec_field)${nc}" #sed 's/^( ){20}//g')${nc}"
 echo -e "${b}Modele CPU: ${nc} ${j}$(echo "$info" |head -n 8 |tail -n 1 | sec_field)${nc}"
-echo -e "${b}CPU cores/threads/sockets: ${nc} ${j} $(echo "$core_per_socket*$sockets" |bc -l)/$(echo "$threads_per_core*$core_per_socket*$sockets" |bc -l)/$(echo "$sockets" |bc -l) ${nc}"
+echo -e "${b}CPU cores/threads/sockets: ${nc} ${j} $((core_per_socket * sockets))/$(echo "$threads_per_core*$core_per_socket*$sockets" |bc -l)/$(echo "$sockets" |bc -l) ${nc}"
 
 ##information memoire (coté RAM et disque)
 mem=$(free -h |head -n 2 |tail -n 1)
 echo -e "${b}RAM:${nc}"
-echo -e "${v} _totale: ${nc} ${j}$(echo -e "$mem" |awk '{ print $2 }' |sed 's/i//g') ${nc}"
+echo -e "${v} _totale: ${nc} ${j}$(echo -e "$mem" |awk '{ print $2 }') ${nc}"
 echo -e "${v} _disponible (prete à utiliser): ${nc} ${j}$(echo -e "$mem" |awk '{ print $7 }' |sed 's/i//g') ${nc}"
-echo -e "${v} _libre (inutilisable): ${nc} ${j}$(echo -e "$mem" |awk '{ print $4 }' |sed 's/i//g') ${nc}"
+echo -e "${v} _libre (non utilisée mais récupérable) : ${nc} ${j}$(echo -e "$mem" |awk '{ print $4 }' |sed 's/i//g') ${nc}"
 nb_disque=$(lsblk -d -e 7 -o NAME,SIZE |wc -l)
 disque=$(lsblk -d -o NAME,SIZE)
 line=2
 echo -e "${b}DISQUE:${nc}"
 while((line <= nb_disque));do
   echo -e "${v} $(echo -e "$disque" |head -n $line |tail -n 1) ${nc}"
-  line=$(echo "$line+1" |bc -l)
+  ((line++))
 done
 
 ###information cote logiciel
