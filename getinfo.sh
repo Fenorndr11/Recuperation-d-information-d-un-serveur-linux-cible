@@ -53,18 +53,18 @@ file=/sys/class/dmi/id
 echo -e "\n\n${r}\t\t\t======================\n\t\t\t  HARDWARE INFORMATION\n\t\t\t====================== ${nc}"
 if [[ -d $file ]];then
   if [[ -r "$file/sys_vendor" ]];then
-    model=$(cat $file/sys_vendor)
+    model=$(<$file/sys_vendor)
   elif [[ -r "$file/board_vendor" ]];then
-	model=$(cat $file/board_vendor)
+	model=$(<$file/board_vendor)
   elif [[ -r "$file/chassis_vendor" ]];then
-	model=$(cat $file/chassis_vendor)
+	model=$(<$file/chassis_vendor)
   fi
   
   if [[ -r "$file/product_name" ]];then
-	model+=" $(cat $file/product_name)"
+	model+=" $(<$file/product_name)"
   fi
   if [[ -r "$file/product_version" ]];then
-	model+=" $(cat $file/product_version)"
+	model+=" $(<$file/product_version)"
   fi
 elif [[ -r /sys/firmware/devicetree/base/model ]];then
   model=$(cat /sys/firmware/devicetree/base/model)
@@ -75,9 +75,9 @@ fi
 
 ##architecture et information cpu
 info=$(lscpu)
-core_per_socket=$(echo "$info" |head -n 12 |tail -n 1 | sec_field)
-threads_per_core=$(echo "$info" |head -n 11 |tail -n 1 | sec_field) 
-sockets=$(echo "$info" |head -n 13 |tail -n 1 | sec_field)
+core_per_socket=$(echo "$info" | awk -F: '/^Core\(s\) per socket/ {gsub(/ /,"",$2); print $2}')
+threads_per_core=$(echo "$info" | awk -F: '/^Thread\(s\) per core/ {gsub(/ /,"",$2); print $2}')
+sockets=$(echo "$info"          | awk -F: '/^Socket\(s\)/          {gsub(/ /,"",$2); print $2}')
 echo -e "${b}Architecture: ${nc} ${j}$(echo "$info" |head -n 1 |tail -n 1 | sec_field)${nc}" #sed 's/^( ){20}//g')${nc}"
 echo -e "${b}Modele CPU: ${nc} ${j}$(echo "$info" |head -n 8 |tail -n 1 | sec_field)${nc}"
 echo -e "${b}CPU cores/threads/sockets: ${nc} ${j} $(echo "$core_per_socket*$sockets" |bc -l)/$(echo "$threads_per_core*$core_per_socket*$sockets" |bc -l)/$(echo "$sockets" |bc -l) ${nc}"
@@ -88,7 +88,7 @@ echo -e "${b}RAM:${nc}"
 echo -e "${v} _totale: ${nc} ${j}$(echo -e "$mem" |awk '{ print $2 }' |sed 's/i//g') ${nc}"
 echo -e "${v} _disponible (prete à utiliser): ${nc} ${j}$(echo -e "$mem" |awk '{ print $7 }' |sed 's/i//g') ${nc}"
 echo -e "${v} _libre (inutilisable): ${nc} ${j}$(echo -e "$mem" |awk '{ print $4 }' |sed 's/i//g') ${nc}"
-nb_disque=$(lsblk -d -o NAME,SIZE |wc -l)
+nb_disque=$(lsblk -d -e 7 -o NAME,SIZE |wc -l)
 disque=$(lsblk -d -o NAME,SIZE)
 line=2
 echo -e "${b}DISQUE:${nc}"
@@ -115,7 +115,6 @@ echo -e "${b}Nombre de processus en cours: ${nc} ${j}$(ps -e --no-headers | wc -
 
 ###information cote reseau
 echo -e "\n\n${r}\t\t\t======================\n\t\t\t  NETWORK INFORMATION\n\t\t\t====================== ${nc}"
-interface_wifi=($(ip -o a show up primary scope global | awk '{ print $2 }' | uniq | head -n 1))
 echo -e "${b}Nom de la machine: ${nc} ${j}$HOSTNAME${nc}"
 if command -v iwgetid >/dev/null; then
 	NETWORKNAME=$(iwgetid -r || true)
@@ -124,5 +123,8 @@ if [[ -n $NETWORKNAME ]]; then
 	echo -e "${b}Nom du reseau (SSID): ${nc} ${j}$NETWORKNAME${nc}"
 fi
 echo -e "${b}Adresse ipv4: ${nc} ${j}$(ip -o -4 a show up scope global | awk '{ print $2,$4 }')${nc}"
-echo -e "${b}Adresse MAC: ${nc} ${j}$(cat /sys/class/net/$interface_wifi/address)${nc}"
+for interface in $(ip -o a show up primary scope global | awk '{ print $2 }' | uniq); do
+    mac=$(</sys/class/net/$interface/address)
+    echo -e "${b}MAC ($iface):${nc} ${j}$mac${nc}"
+done
 
